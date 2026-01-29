@@ -20,6 +20,12 @@ const Workspace: React.FC<Props> = ({ user, incidents, selectedIncident, onSelec
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const filteredIncidents = incidents.filter(inc => {
+    if (activeView === 'resolved') {
+      return inc.state === 'Resolved' || inc.state === 'Closed';
+    }
+    if (inc.state === 'Resolved' || inc.state === 'Closed' || inc.state === 'Canceled') {
+      if (activeView !== 'all') return false;
+    }
     if (activeView === 'unassigned') return inc.assigned_to === 'Unassigned';
     if (activeView === 'critical') return inc.priority.includes('1');
     return true;
@@ -85,6 +91,7 @@ const Workspace: React.FC<Props> = ({ user, incidents, selectedIncident, onSelec
                   { id: 'all', label: 'Incidents - All', icon: 'fa-ticket' },
                   { id: 'unassigned', label: 'Unassigned', icon: 'fa-user-clock' },
                   { id: 'critical', label: 'Critical Overdue', icon: 'fa-fire' },
+                  { id: 'resolved', label: 'Resolved', icon: 'fa-check-circle' },
                 ].map(item => (
                   <button 
                     key={item.id}
@@ -107,15 +114,6 @@ const Workspace: React.FC<Props> = ({ user, incidents, selectedIncident, onSelec
             <h1 className="text-sm md:text-lg font-bold text-slate-800 capitalize">
               {activeView === 'dashboard' ? 'Assurance Executive Overview' : activeView + ' Incidents'}
             </h1>
-            <div className="flex gap-2">
-              <button 
-                onClick={onNew}
-                className="px-3 md:px-4 py-2 bg-indigo-600 text-white text-[10px] md:text-xs font-bold rounded shadow-sm hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-2"
-              >
-                <i className="fa-solid fa-plus"></i>
-                New Incident
-              </button>
-            </div>
           </div>
 
           <div className="flex-1 overflow-auto bg-slate-50/50">
@@ -123,7 +121,10 @@ const Workspace: React.FC<Props> = ({ user, incidents, selectedIncident, onSelec
               <div className="p-4 md:p-8 max-w-6xl mx-auto">
                 <DashboardOverview 
                   stats={stats} 
-                  recentIncidents={incidents.filter(i => i.priority.includes('1') || i.state === 'In Progress').slice(0, 5)}
+                  recentIncidents={incidents.filter(i => {
+                    const isActive = i.state !== 'Resolved' && i.state !== 'Closed' && i.state !== 'Canceled';
+                    return isActive && (i.priority.includes('1') || i.state === 'In Progress');
+                  }).slice(0, 5)}
                   onSelectIncident={onSelect}
                 />
               </div>

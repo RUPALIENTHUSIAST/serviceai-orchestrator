@@ -17,6 +17,7 @@ const IncidentForm: React.FC<Props> = ({ incident, onClose, onUpdate, user }) =>
   const [isInternal, setIsInternal] = useState(true);
   const [assistData, setAssistData] = useState<any>(null);
   const [loadingAssist, setLoadingAssist] = useState(false);
+  const [showResolve, setShowResolve] = useState(false);
 
   const isNew = incident.state === 'New' && incident.comments.length === 0 && !incident.short_description;
   const isPortalUser = user.role !== 'admin';
@@ -55,6 +56,16 @@ const IncidentForm: React.FC<Props> = ({ incident, onClose, onUpdate, user }) =>
     setNewComment('');
   };
 
+  const handleResolve = () => {
+    if (!formData.resolution_code || !formData.resolution_notes) {
+      alert('Please provide resolution code and notes.');
+      return;
+    }
+    const resolved = { ...formData, state: 'Resolved' as const, resolved_at: new Date().toISOString() };
+    onUpdate(resolved);
+    setShowResolve(false);
+  };
+
   return (
     <div className="flex flex-col h-full animate-in slide-in-from-right-10 duration-300">
       <div className="h-12 border-b border-slate-200 flex items-center px-4 md:px-6 justify-between bg-white shrink-0 shadow-sm z-10">
@@ -70,6 +81,11 @@ const IncidentForm: React.FC<Props> = ({ incident, onClose, onUpdate, user }) =>
           </div>
         </div>
         <div className="flex gap-2">
+          {!isNew && formData.state !== 'Resolved' && !isPortalUser && (
+            <button onClick={() => setShowResolve(!showResolve)} className="px-3 md:px-4 py-1.5 bg-green-600 text-white text-[10px] md:text-[11px] font-bold rounded shadow hover:bg-green-700 transition-all active:scale-95">
+              Resolve
+            </button>
+          )}
           <button onClick={handleUpdate} className="px-3 md:px-4 py-1.5 bg-indigo-600 text-white text-[10px] md:text-[11px] font-bold rounded shadow hover:bg-indigo-700 transition-all active:scale-95">
             {isNew ? 'Submit' : 'Update'}
           </button>
@@ -79,6 +95,27 @@ const IncidentForm: React.FC<Props> = ({ incident, onClose, onUpdate, user }) =>
 
       <div className="flex-1 overflow-auto bg-[#f0f3f4] p-3 md:p-6 flex flex-col lg:flex-row gap-4 md:gap-6">
         <div className="flex-1 flex flex-col gap-4 md:gap-6">
+          {showResolve && (
+            <div className="bg-green-50 border border-green-200 rounded p-4 space-y-3">
+              <h3 className="text-xs font-bold text-green-800">Resolve Incident</h3>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Resolution Code</label>
+                <select value={formData.resolution_code || ''} onChange={e => setFormData({...formData, resolution_code: e.target.value})} className="w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none">
+                  <option value="">Select...</option>
+                  <option>Solved (Permanently)</option>
+                  <option>Solved (Work Around)</option>
+                  <option>Solved Remotely</option>
+                  <option>Not Solved (Not Reproducible)</option>
+                  <option>Closed/Resolved by Caller</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Resolution Notes</label>
+                <textarea value={formData.resolution_notes || ''} onChange={e => setFormData({...formData, resolution_notes: e.target.value})} className="w-full border border-slate-300 rounded px-2 py-2 text-xs h-20 outline-none resize-none" placeholder="Describe the resolution..."/>
+              </div>
+              <button onClick={handleResolve} className="w-full px-4 py-2 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700">Confirm Resolution</button>
+            </div>
+          )}
           <div className="bg-white rounded p-4 md:p-6 shadow-sm border border-slate-200 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
@@ -87,18 +124,38 @@ const IncidentForm: React.FC<Props> = ({ incident, onClose, onUpdate, user }) =>
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-500 uppercase">Caller</label>
-                <input readOnly={isPortalUser} value={formData.caller} onChange={e => setFormData({...formData, caller: e.target.value})} className={`w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none focus:border-indigo-500 ${isPortalUser ? 'bg-slate-50 text-slate-500' : ''}`} />
+                <input value={formData.caller} onChange={e => setFormData({...formData, caller: e.target.value})} className="w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none focus:border-indigo-500" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-500 uppercase">Configuration Item (CI)</label>
-                <input value={formData.cmdb_ci} onChange={e => setFormData({...formData, cmdb_ci: e.target.value})} className="w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none font-mono" placeholder="Affected equipment ID" />
+                <input value={formData.cmdb_ci} onChange={e => setFormData({...formData, cmdb_ci: e.target.value})} className="w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none font-mono focus:border-indigo-500" placeholder="Affected equipment ID" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-500 uppercase">Category / Service</label>
                 <input readOnly={isPortalUser} value={formData.business_service} onChange={e => setFormData({...formData, business_service: e.target.value})} className={`w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none ${isPortalUser ? 'bg-slate-50 text-slate-500' : ''}`} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Assignment Group</label>
+                <select disabled={isPortalUser} value={formData.assignment_group} onChange={e => setFormData({...formData, assignment_group: e.target.value})} className={`w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none ${isPortalUser ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
+                  <option>Unassigned</option>
+                  <option>Service Desk</option>
+                  <option>Openreach Field Ops</option>
+                  <option>Civils Team</option>
+                  <option>Third Party Liaison</option>
+                  <option>Network Core Support</option>
+                  <option>Hardware Support</option>
+                  <option>Facilities IT</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase">Assigned To</label>
+                <input readOnly={isPortalUser} value={formData.assigned_to} onChange={e => setFormData({...formData, assigned_to: e.target.value})} className={`w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none ${isPortalUser ? 'bg-slate-50 text-slate-500' : ''}`} />
               </div>
             </div>
 
@@ -131,18 +188,31 @@ const IncidentForm: React.FC<Props> = ({ incident, onClose, onUpdate, user }) =>
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-500 uppercase">Priority</label>
-                <div className="flex items-center gap-2">
-                  <input readOnly value={formData.priority} className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-[10px] font-bold text-slate-700 outline-none" />
-                  {isPortalUser && (
-                    <i className="fa-solid fa-lock text-slate-300 text-[10px]" title="Priority is determined by Service Desk"></i>
-                  )}
-                </div>
+                <select disabled={isPortalUser} value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})} className={`w-full border border-slate-300 rounded px-2 py-1 text-[10px] outline-none ${isPortalUser ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`}>
+                  <option>1 - Critical</option>
+                  <option>2 - High</option>
+                  <option>3 - Moderate</option>
+                  <option>4 - Low</option>
+                </select>
               </div>
             </div>
             {isPortalUser && (
               <p className="text-[9px] text-slate-400 italic mt-2">
                 * Priority is calculated automatically by IT based on your Impact and Urgency selections.
               </p>
+            )}
+
+            {!isPortalUser && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Parent Incident</label>
+                  <input value={formData.parent_incident || ''} onChange={e => setFormData({...formData, parent_incident: e.target.value})} className="w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none font-mono" placeholder="INC0000000" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase">Child Incidents</label>
+                  <input value={formData.child_incidents?.join(', ') || ''} onChange={e => setFormData({...formData, child_incidents: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})} className="w-full border border-slate-300 rounded px-2 py-1 text-xs outline-none font-mono" placeholder="INC0000001, INC0000002" />
+                </div>
+              </div>
             )}
           </div>
 

@@ -51,6 +51,16 @@ export interface Incident {
   resolved_at?: string;
   resolution_code?: string;
   resolution_notes?: string;
+  parent_incident?: string;
+  child_incidents?: string[];
+}
+
+export interface TeamStats {
+  teamName: string;
+  totalAssigned: number;
+  resolved: number;
+  inProgress: number;
+  avgResolutionTime: number;
 }
 
 export interface DashboardStats {
@@ -62,6 +72,12 @@ export interface DashboardStats {
   inJeopardy: number;
   p1Count: number;
   awaitingApproval: number;
+  teamStats: TeamStats[];
+  impactBreakdown: {
+    extensive: number;
+    significant: number;
+    moderate: number;
+  };
 }
 
 export interface OrchestrationResponse {

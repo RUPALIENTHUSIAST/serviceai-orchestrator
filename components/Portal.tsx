@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Incident, User } from '../types';
 import StatusBadge from './StatusBadge';
 import IncidentForm from './IncidentForm';
+import Chatbot from './Chatbot';
 
 interface Props {
   user: User;
@@ -42,10 +43,12 @@ const Portal: React.FC<Props> = ({ user, incidents, onSelect, onNew, selectedInc
   ];
 
   const userCatalog = [
-    { id: 's1', title: 'Full Fiber 900 Upgrade', desc: 'The fastest broadband available.', icon: 'fa-bolt' },
-    { id: 's2', title: 'Static IP Address', desc: 'Essential for hosting and remote servers.', icon: 'fa-network-wired' },
-    { id: 's3', title: 'Smart Wi-Fi Extender', desc: 'Eliminate dead zones in your home.', icon: 'fa-wifi' },
-    { id: 's4', title: 'Priority Care Pack', desc: '24/7 priority fault resolution.', icon: 'fa-shield-heart' },
+    { id: 's1', title: 'Full Fiber Upgrade', desc: 'Upgrade to faster broadband speeds', icon: 'fa-bolt', color: 'blue' },
+    { id: 's2', title: 'Static IP Address', desc: 'Request dedicated IP for business', icon: 'fa-network-wired', color: 'indigo' },
+    { id: 's3', title: 'Wi-Fi Extender', desc: 'Improve coverage in your premises', icon: 'fa-wifi', color: 'purple' },
+    { id: 's4', title: 'Priority Support', desc: '24/7 priority fault resolution', icon: 'fa-shield-heart', color: 'green' },
+    { id: 's5', title: 'Business Line', desc: 'Add additional business broadband line', icon: 'fa-building', color: 'orange' },
+    { id: 's6', title: 'Engineer Visit', desc: 'Schedule on-site engineer assessment', icon: 'fa-user-gear', color: 'emerald' },
   ];
 
   const employeeKB = [
@@ -70,15 +73,15 @@ const Portal: React.FC<Props> = ({ user, incidents, onSelect, onNew, selectedInc
       <h2 className="text-2xl font-bold text-slate-800 mb-6">{isEmployee ? "Hardware & Equipment Catalog" : "Service Catalog"}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {(isEmployee ? employeeCatalog : userCatalog).map(item => (
-          <div key={item.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+          <div key={item.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
+            <div className={`w-10 h-10 rounded-lg bg-${item.color || 'indigo'}-50 text-${item.color || 'indigo'}-600 flex items-center justify-center shrink-0`}>
               <i className={`fa-solid ${item.icon}`}></i>
             </div>
             <div className="flex-1">
               <h3 className="font-bold text-slate-800">{item.title}</h3>
               <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
               <button onClick={onNew} className="text-xs font-bold text-white bg-indigo-600 px-3 py-1.5 rounded hover:bg-indigo-700 transition-colors">
-                Request Now
+                {item.id === 's8' ? 'Browse Articles' : 'Create Request'}
               </button>
             </div>
           </div>
@@ -109,6 +112,7 @@ const Portal: React.FC<Props> = ({ user, incidents, onSelect, onNew, selectedInc
 
   return (
     <div className="flex-1 overflow-auto bg-slate-50 p-4 md:p-6">
+      <Chatbot />
       {activeView === 'catalog' && renderCatalog()}
       {activeView === 'kb' && renderKB()}
       
@@ -116,7 +120,7 @@ const Portal: React.FC<Props> = ({ user, incidents, onSelect, onNew, selectedInc
         <div className="max-w-4xl mx-auto py-6 md:py-12">
           <div className="mb-8 md:mb-10 text-center px-4">
             <h1 className="text-2xl md:text-3xl font-bold text-[#293e40] mb-2">
-              Welcome, {user.name.split(' ')[0]}!
+              Welcome!
             </h1>
             <p className="text-sm md:text-base text-slate-500">
               {isEmployee ? "Employee Center - Manage your workplace needs." : "How can we help you with your services today?"}
@@ -131,36 +135,163 @@ const Portal: React.FC<Props> = ({ user, incidents, onSelect, onNew, selectedInc
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
+            {isEmployee ? (
+              <>
+                <button 
+                  onClick={onNew}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-red-50 text-red-600">
+                    <i className="fa-solid fa-laptop"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">IT Support</span>
+                </button>
+                
+                <button 
+                  onClick={onNew}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-blue-50 text-blue-600">
+                    <i className="fa-solid fa-box"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">Equipment</span>
+                </button>
+
+                <button 
+                  onClick={onNew}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-purple-50 text-purple-600">
+                    <i className="fa-solid fa-key"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">Access Request</span>
+                </button>
+
+                <button 
+                  onClick={onNew}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-orange-50 text-orange-600">
+                    <i className="fa-solid fa-mobile-screen"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">Mobile Device</span>
+                </button>
+
+                <button 
+                  onClick={onNew}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-green-50 text-green-600">
+                    <i className="fa-solid fa-building"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">Facilities</span>
+                </button>
+
+                <button 
+                  onClick={onNew}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-indigo-50 text-indigo-600">
+                    <i className="fa-solid fa-users"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">HR Request</span>
+                </button>
+
+                <button 
+                  onClick={onNew}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-yellow-50 text-yellow-600">
+                    <i className="fa-solid fa-plane"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">Travel</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveView('kb')}
+                  className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-emerald-50 text-emerald-600">
+                    <i className="fa-solid fa-book"></i>
+                  </div>
+                  <span className="font-bold text-xs text-slate-800">Knowledge Base</span>
+                </button>
+              </>
+            ) : (
+              <>
             <button 
               onClick={onNew}
-              className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-3"
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
             >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl bg-red-50 text-red-600">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-red-50 text-red-600">
                 <i className="fa-solid fa-triangle-exclamation"></i>
               </div>
-              <span className="font-bold text-slate-800">{isEmployee ? "Report Hardware Fault" : "Report Outage"}</span>
+              <span className="font-bold text-xs text-slate-800">Report Outage</span>
             </button>
             
             <button 
-              onClick={() => setActiveView('catalog')}
-              className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-3"
+              onClick={onNew}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
             >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl bg-blue-50 text-blue-600">
-                <i className={isEmployee ? "fa-solid fa-laptop" : "fa-solid fa-cart-shopping"}></i>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-blue-50 text-blue-600">
+                <i className="fa-solid fa-bolt"></i>
               </div>
-              <span className="font-bold text-slate-800">{isEmployee ? "Request Hardware" : "Request Service"}</span>
+              <span className="font-bold text-xs text-slate-800">Fibre Issues</span>
             </button>
 
             <button 
-              onClick={() => setActiveView('kb')}
-              className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-3 sm:col-span-2 md:col-span-1"
+              onClick={onNew}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
             >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl bg-emerald-50 text-emerald-600">
-                <i className={isEmployee ? "fa-solid fa-building" : "fa-solid fa-book"}></i>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-orange-50 text-orange-600">
+                <i className="fa-solid fa-router"></i>
               </div>
-              <span className="font-bold text-slate-800">{isEmployee ? "Workplace Support" : "Knowledge Base"}</span>
+              <span className="font-bold text-xs text-slate-800">Hardware</span>
             </button>
+
+            <button 
+              onClick={onNew}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-purple-50 text-purple-600">
+                <i className="fa-solid fa-laptop-code"></i>
+              </div>
+              <span className="font-bold text-xs text-slate-800">Software</span>
+            </button>
+
+            <button 
+              onClick={onNew}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-indigo-50 text-indigo-600">
+                <i className="fa-solid fa-building"></i>
+              </div>
+              <span className="font-bold text-xs text-slate-800">Broadband</span>
+            </button>
+
+            <button 
+              onClick={onNew}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-green-50 text-green-600">
+                <i className="fa-solid fa-user-gear"></i>
+              </div>
+              <span className="font-bold text-xs text-slate-800">Field Agent</span>
+            </button>
+
+            <button 
+              onClick={onNew}
+              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all active:scale-95 flex flex-col items-center text-center gap-2"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg bg-slate-50 text-slate-600">
+                <i className="fa-solid fa-user-circle"></i>
+              </div>
+              <span className="font-bold text-xs text-slate-800">Account</span>
+            </button>
+
+              </>
+            )}
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

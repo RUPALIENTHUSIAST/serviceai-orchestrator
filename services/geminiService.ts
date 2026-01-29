@@ -1,7 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Always use process.env.API_KEY directly for initialization
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const ASSIST_SYSTEM_INSTRUCTION = `
@@ -11,6 +10,11 @@ Your task is to analyze incident descriptions and provide:
 2. Search keywords for the Knowledge Base.
 3. A summary of the likely technical fault based on Openreach terminology.
 4. Suggested Next Action for the resolver.
+5. Inferred tasks with default assignment groups:
+   - 'Field Engineer Task' → 'Openreach Field Ops'
+   - 'Estimate / Civils Task' → 'Civils Team'
+   - 'Third-Party Dependency Task' → 'Third Party Liaison'
+6. Service type classification: Business, Consumer, International, or Corporate.
 
 Return results in a clean JSON format.
 `;
@@ -18,7 +22,7 @@ Return results in a clean JSON format.
 export const getAgentAssist = async (description: string, shortDescription: string) => {
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: [{ parts: [{ text: `Analyze this incident: 
         Summary: ${shortDescription}
         Description: ${description}` }] }],
@@ -31,9 +35,20 @@ export const getAgentAssist = async (description: string, shortDescription: stri
             suggestedCI: { type: Type.STRING },
             kbKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
             faultAnalysis: { type: Type.STRING },
-            suggestedNextAction: { type: Type.STRING }
+            suggestedNextAction: { type: Type.STRING },
+            inferredTasks: { 
+              type: Type.ARRAY, 
+              items: { 
+                type: Type.OBJECT,
+                properties: {
+                  taskType: { type: Type.STRING },
+                  assignmentGroup: { type: Type.STRING }
+                }
+              }
+            },
+            serviceType: { type: Type.STRING }
           },
-          required: ["suggestedCI", "kbKeywords", "faultAnalysis", "suggestedNextAction"]
+          required: ["suggestedCI", "kbKeywords", "faultAnalysis", "suggestedNextAction", "inferredTasks", "serviceType"]
         }
       }
     });
