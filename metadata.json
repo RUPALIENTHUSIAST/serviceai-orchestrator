@@ -1,0 +1,5 @@
+{
+  "name": "ServiceAI Orchestrator",
+  "description": "A high-fidelity telecom service assurance and workflow orchestration platform simulating BT/Openreach incident management workflows with real-time SLA monitoring and task orchestration.",
+  "requestFramePermissions": []
+}
